@@ -1,0 +1,72 @@
+@startuml DiagramaSecuencia_InteraccionChatbot
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+skinparam maxmessagesize 100
+skinparam sequenceParticipant underline
+skinparam sequenceLifeLineBorderColor #A9D18E
+skinparam sequenceLifeLineBackgroundColor #E2F0D9
+skinparam sequenceGroupBackgroundColor #FCE4D6
+skinparam sequenceGroupBorderColor #F4B084
+
+title Diagrama de Secuencia - Interacción con el Chatbot
+
+actor "Usuario" as User
+participant "Componente\nChatbot" as ChatUI
+participant "AI Service" as AIService
+participant "Servicios\nEspecíficos" as Services
+participant "Base de Datos" as DB
+
+autonumber
+
+User -> ChatUI: Envía mensaje
+activate ChatUI
+
+ChatUI -> AIService: processChatMessage(mensaje)
+activate AIService
+
+AIService -> AIService: Analizar intención\ny entidades
+
+alt Intención: consulta general
+    AIService -> AIService: Generar respuesta\nbasada en conocimiento
+    AIService --> ChatUI: Respuesta informativa
+else Intención: generar reporte
+    AIService -> Services: handleReportDownload(intent, entities)
+    activate Services
+    Services -> DB: Consultar datos
+    activate DB
+    DB --> Services: Datos obtenidos
+    deactivate DB
+    Services -> Services: Generar reporte PDF
+    Services --> AIService: URL de descarga
+    deactivate Services
+    AIService --> ChatUI: Respuesta con enlace de descarga
+else Intención: crear usuario/curso/etc
+    AIService -> Services: Solicitar servicio correspondiente
+    activate Services
+    Services -> DB: Operación de creación
+    activate DB
+    DB --> Services: Resultado
+    deactivate DB
+    Services --> AIService: Confirmación
+    deactivate Services
+    AIService --> ChatUI: Respuesta de confirmación
+else Intención: necesita más datos
+    AIService --> ChatUI: Solicitud de información adicional
+    deactivate AIService
+    ChatUI --> User: Solicita más información
+    User -> ChatUI: Proporciona información adicional
+    activate AIService
+    ChatUI -> AIService: processChatMessage(mensaje, contexto)
+    AIService -> AIService: Procesar con contexto completo
+    AIService -> Services: Ejecutar acción correspondiente
+    activate Services
+    Services --> AIService: Resultado
+    deactivate Services
+    AIService --> ChatUI: Respuesta final
+end
+
+deactivate AIService
+ChatUI --> User: Muestra respuesta
+deactivate ChatUI
+
+@enduml

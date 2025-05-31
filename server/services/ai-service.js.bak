@@ -1,0 +1,405 @@
+import axios from 'axios';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import User from '../models/User.js';
+import Student from '../models/Student.js';
+import Teacher from '../models/Teacher.js';
+import Course from '../models/Course.js';
+import Assignment from '../models/Assignment.js';
+import Attendance from '../models/Attendance.js';
+
+dotenv.config();
+
+// Configuración de conexión a MongoDB
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/edutrack360');
+    console.log('MongoDB connected successfully');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    throw error;
+  }
+};
+
+// Función para generar respuestas alternativas cuando Ollama no está disponible
+const generateFallbackResponse = async (intent, entities, message) => {
+  // Base de conocimiento para respuestas generales
+  const knowledgeBase = {
+    // Preguntas sobre la plataforma
+    'que_es_edutrack360': 'EduTrack360 es una plataforma educativa integral que permite la gestión de estudiantes, profesores, cursos, asistencias y calificaciones. Está diseñada para facilitar el seguimiento del progreso académico y mejorar la comunicación entre todos los actores del proceso educativo.',
+    'funcionalidades': 'EduTrack360 ofrece funcionalidades como gestión de usuarios, administración de cursos, seguimiento de asistencia, calificación de tareas, generación de reportes y análisis de rendimiento académico.',
+    
+    // Preguntas sobre roles
+    'rol_admin': 'Los administradores pueden gestionar todos los aspectos de la plataforma: crear/modificar usuarios, cursos, asignar profesores, generar reportes globales y configurar parámetros del sistema.',
+    'rol_profesor': 'Los profesores pueden gestionar sus cursos asignados, registrar asistencia, calificar tareas, comunicarse con estudiantes y generar reportes de rendimiento de sus clases.',
+    'rol_estudiante': 'Los estudiantes pueden ver sus cursos, revisar calificaciones, entregar tareas, consultar su asistencia y comunicarse con sus profesores.',
+    
+    // Preguntas sobre tecnología
+    'tecnologias': 'EduTrack360 está desarrollado con React para el frontend, Node.js y Express para el backend, MongoDB como base de datos, y utiliza Ollama para funcionalidades de IA.',
+    
+    // Preguntas sobre educación general
+    'metodos_aprendizaje': 'Existen diversos métodos de aprendizaje como el aprendizaje basado en proyectos, aprendizaje colaborativo, aula invertida, aprendizaje basado en problemas y gamificación, entre otros.',
+    'evaluacion_educativa': 'La evaluación educativa puede ser diagnóstica (al inicio), formativa (durante el proceso) o sumativa (al final). Cada tipo tiene propósitos específicos y complementarios.',
+    
+    // Preguntas sobre gestión educativa
+    'mejores_practicas': 'Algunas mejores prácticas en gestión educativa incluyen: establecer objetivos claros, mantener comunicación constante con estudiantes y padres, implementar evaluación continua, personalizar la enseñanza y utilizar datos para tomar decisiones.',
+    'gestion_aula': 'La gestión efectiva del aula incluye establecer reglas claras, crear un ambiente positivo, planificar clases estructuradas, implementar estrategias de participación y manejar adecuadamente los conflictos.',
+  };
+  
+  // Respuestas predefinidas basadas en la intención detectada
+  switch (intent) {
+    case 'create_user':
+      return 'Puedo ayudarte a crear un usuario. Necesito el nombre, correo electrónico y rol (estudiante, profesor o administrador). Por favor, proporciona esta información.';
+    
+    case 'create_course':
+      return 'Puedo ayudarte a crear un curso. Necesito el nombre del curso y un código único. También puedes proporcionar una descripción y el correo del profesor asignado.';
+    
+    case 'generate_report':
+      return 'Puedo generar reportes de rendimiento de estudiantes, asistencia a cursos o estadísticas generales. ¿Qué tipo de reporte necesitas?';
+    
+    case 'general_query':
+      // Intentar identificar el tema de la pregunta
+      const lowerMessage = message.toLowerCase();
+      
+      // Buscar coincidencias en la base de conocimiento
+      if (lowerMessage.includes('edutrack') && (lowerMessage.includes('qué es') || lowerMessage.includes('que es'))) {
+        return knowledgeBase.que_es_edutrack360;
+      }
+      if (lowerMessage.includes('funcionalidad') || lowerMessage.includes('característica')) {
+        return knowledgeBase.funcionalidades;
+      }
+      if (lowerMessage.includes('administrador') || lowerMessage.includes('admin')) {
+        return knowledgeBase.rol_admin;
+      }
+      if (lowerMessage.includes('profesor') || lowerMessage.includes('docente') || lowerMessage.includes('maestro')) {
+        return knowledgeBase.rol_profesor;
+      }
+      if (lowerMessage.includes('estudiante') || lowerMessage.includes('alumno')) {
+        return knowledgeBase.rol_estudiante;
+      }
+      if (lowerMessage.includes('tecnología') || lowerMessage.includes('desarrollado') || lowerMessage.includes('stack')) {
+        return knowledgeBase.tecnologias;
+      }
+      if (lowerMessage.includes('método') && lowerMessage.includes('aprendizaje')) {
+        return knowledgeBase.metodos_aprendizaje;
+      }
+      if (lowerMessage.includes('evaluación') || lowerMessage.includes('evaluar')) {
+        return knowledgeBase.evaluacion_educativa;
+      }
+      if (lowerMessage.includes('mejores prácticas') || lowerMessage.includes('buenas prácticas')) {
+        return knowledgeBase.mejores_practicas;
+      }
+      if (lowerMessage.includes('gestión') && lowerMessage.includes('aula')) {
+        return knowledgeBase.gestion_aula;
+      }
+      
+      // Si no se encuentra una coincidencia específica, dar una respuesta general
+      return 'Como asistente de EduTrack360, puedo responder preguntas sobre la plataforma, roles de usuarios, metodologías educativas, gestión académica y muchos otros temas relacionados con la educación. También puedo ayudarte con la creación de usuarios, cursos y generación de reportes. ¿En qué puedo ayudarte específicamente?';
+    
+    default:
+      return 'Soy el asistente de EduTrack360. Puedo ayudarte con la gestión de usuarios, cursos y reportes, así como responder preguntas sobre educación y tecnología. ¿En qué puedo asistirte hoy?';
+  }
+};
+
+// Función para comunicarse con Ollama
+    };
+    
+    // Añadir filtros si existen
+    if (entities.courseCode) reportParams.filters.courseCode = entities.courseCode;
+    if (entities.courseName) reportParams.filters.courseName = entities.courseName;
+    if (entities.studentId) reportParams.filters.studentId = entities.studentId;
+    if (entities.studentName) reportParams.filters.studentName = entities.studentName;
+    if (entities.startDate) reportParams.filters.startDate = entities.startDate;
+    if (entities.endDate) reportParams.filters.endDate = entities.endDate;
+    if (entities.minAttendance) reportParams.filters.minAttendance = entities.minAttendance;
+    if (entities.minGrade) reportParams.filters.minGrade = entities.minGrade;
+    if (entities.maxGrade) reportParams.filters.maxGrade = entities.maxGrade;
+    
+    // Generar un nombre de archivo para el reporte
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const fileName = `${reportType}_report_${timestamp}.pdf`;
+    
+    // Aquí iría la lógica para generar el PDF
+    // Por ahora, devolvemos un mensaje de éxito simulando la generación
+    return {
+      success: true,
+      message: `El reporte ha sido generado y está listo para descargar. Nombre del archivo: ${fileName}`,
+      fileName: fileName,
+      downloadUrl: `/api/reports/download/${fileName}` // URL para descargar el reporte
+    };
+  } catch (error) {
+    console.error('Error al generar el reporte PDF:', error);
+    return {
+      success: false,
+      message: 'Lo siento, hubo un error al generar el reporte en PDF. Por favor, inténtalo de nuevo más tarde.'
+    };
+  }
+};
+
+// Función para generar mensajes solicitando datos faltantes basados en los formularios reales
+const generateDataRequestMessage = (intent, entities) => {
+  let missingFields = [];
+  let message = '';
+  
+  switch (intent) {
+    // ...
+    
+    case 'generate_report':
+    case 'generate_attendance_report':
+    case 'generate_grades_report':
+    case 'generate_performance_report':
+      // Sugerir filtros para el reporte basados en los parámetros reales
+      let suggestedFilters = [];
+      if (!entities.courseCode && !entities.courseName) suggestedFilters.push('curso (código o nombre)');
+      if (!entities.studentId && !entities.studentName) suggestedFilters.push('estudiante (ID o nombre)');
+      if (!entities.startDate) suggestedFilters.push('fecha de inicio (formato: DD/MM/YYYY)');
+      if (!entities.endDate) suggestedFilters.push('fecha de fin (formato: DD/MM/YYYY)');
+      
+      if (intent === 'generate_attendance_report') {
+        if (!entities.minAttendance) suggestedFilters.push('asistencia mínima (porcentaje)');
+      } else if (intent === 'generate_grades_report') {
+        if (!entities.minGrade) suggestedFilters.push('calificación mínima');
+        if (!entities.maxGrade) suggestedFilters.push('calificación máxima');
+      }
+      
+      if (suggestedFilters.length > 0) {
+        message = `Para generar un reporte más preciso, podrías especificar:\n`;
+        message += suggestedFilters.map(filter => `- ${filter}`).join('\n');
+        message += '\n\nEstos filtros son opcionales. ¿Deseas añadir alguno de ellos?';
+      } else {
+        // Si ya tenemos todos los filtros necesarios, preguntar si desea descargar el PDF
+        message = `Tengo toda la información necesaria para generar el reporte. ¿Deseas descargarlo en formato PDF?`;
+      }
+      break;
+  }
+  
+  return message;
+};
+
+// Procesar el mensaje del chat
+const processChatMessage = async (message, userId, role) => {
+  try {
+    // Analizar la intención del mensaje
+    const intent = analyzeIntent(message);
+    console.log(`Intent detected: ${intent}`);
+    
+    // Extraer entidades del mensaje
+    const entities = extractEntities(message);
+    console.log('Entities extracted:', entities);
+    
+    // Verificar si hay intenciones de creación o generación de reportes
+    const createIntents = ['create_user', 'create_teacher', 'create_student', 'create_course'];
+    const reportIntents = ['generate_report', 'generate_attendance_report', 'generate_grades_report', 'generate_performance_report'];
+    
+    // Verificar si el mensaje contiene una respuesta afirmativa sobre descargar el reporte
+    const downloadConfirmationPattern = /s[ií]|claro|por favor|ok|okay|descarga|descargar|generar|genera/i;
+    if (reportIntents.includes(intent) && downloadConfirmationPattern.test(message) && entities.downloadRequested) {
+      // El usuario ha confirmado que desea descargar el reporte
+      const downloadResult = await handleReportDownload(intent, entities);
+      return {
+        message: downloadResult.message,
+        intent: 'download_report',
+        entities: {
+          ...entities,
+          fileName: downloadResult.fileName,
+          downloadUrl: downloadResult.downloadUrl,
+          success: downloadResult.success
+        }
+      };
+    }
+    
+    // Verificar si se necesitan más datos y solicitar al usuario
+    if (createIntents.includes(intent) || reportIntents.includes(intent)) {
+      const dataRequestMessage = generateDataRequestMessage(intent, entities);
+      
+      if (dataRequestMessage) {
+        return {
+          success: true,
+          message: dataRequestMessage,
+          needsMoreData: true,
+          currentIntent: intent,
+          currentEntities: entities
+        };
+      }
+    }
+    
+    // Ejecutar acción según la intención
+    switch (intent) {
+      case 'create_user':
+      case 'create_teacher':
+      case 'create_student':
+        // Determinar el rol basado en la intención
+        let role = entities.role || 'student';
+        if (intent === 'create_teacher') role = 'teacher';
+        if (intent === 'create_student') role = 'student';
+        
+        if (entities.name && entities.email) {
+          actionResult = await createUser({
+            name: entities.name,
+            email: entities.email,
+            role: role,
+            createdBy: userId,
+            // Datos adicionales si están disponibles
+            studentId: entities.studentId,
+            dateOfBirth: entities.dateOfBirth,
+            address: entities.address,
+            phoneNumber: entities.phoneNumber
+          });
+          
+          contextData = `Resultado de la creación de ${role === 'teacher' ? 'profesor' : role === 'student' ? 'estudiante' : 'usuario'}: ${actionResult.success ? 'Exitoso' : 'Fallido'}. ${actionResult.message}`;
+        } else {
+          contextData = `Se detectó intención de crear ${role === 'teacher' ? 'profesor' : role === 'student' ? 'estudiante' : 'usuario'}, pero faltan datos necesarios (nombre y correo electrónico).`;
+        }
+        break;
+        
+      case 'create_course':
+        if (entities.courseName && entities.courseCode) {
+          actionResult = await createCourse({
+            name: entities.courseName,
+            code: entities.courseCode,
+            description: entities.description || `Curso de ${entities.courseName}`,
+            teacherEmail: entities.email,
+            createdBy: userId
+          });
+          
+          contextData = `Resultado de la creación de curso: ${actionResult.success ? 'Exitoso' : 'Fallido'}. ${actionResult.message}`;
+        } else {
+          contextData = 'Se detectó intención de crear curso, pero faltan datos necesarios (nombre y código del curso).';
+        }
+        break;
+        
+      case 'generate_report':
+      case 'generate_attendance_report':
+      case 'generate_grades_report':
+      case 'generate_performance_report':
+        // Determinar el tipo de reporte basado en la intención
+        let reportType = entities.reportType || 'overall_stats';
+        if (intent === 'generate_attendance_report') reportType = 'course_attendance';
+        if (intent === 'generate_grades_report') reportType = 'student_grades';
+        if (intent === 'generate_performance_report') reportType = 'student_performance';
+        
+        // Preparar filtros según el tipo de reporte
+        const filters = {};
+        
+        // Añadir filtros basados en las entidades extraídas
+        if (entities.studentId) filters.studentId = entities.studentId;
+        if (entities.studentName) filters.studentName = entities.studentName;
+        if (entities.courseCode) {
+          try {
+            const Course = mongoose.models.Course || mongoose.model('Course', new mongoose.Schema({}, { strict: false }));
+            const course = await Course.findOne({ code: entities.courseCode });
+            if (course) filters.courseId = course._id;
+          } catch (error) {
+            console.error('Error al buscar curso:', error);
+          }
+        }
+        
+        // Añadir filtros de fecha si están disponibles
+        if (entities.startDate) filters.startDate = entities.startDate;
+        if (entities.endDate) filters.endDate = entities.endDate;
+        
+        // Generar el reporte
+        actionResult = await generateReport(reportType, filters);
+        
+        if (actionResult.success) {
+          // Formatear la respuesta para que sea más legible
+          let formattedReport = 'Reporte generado:\n\n';
+          
+          if (reportType === 'course_attendance') {
+            formattedReport += 'Reporte de Asistencia\n';
+            formattedReport += `Curso: ${actionResult.reportData.courseName || 'Todos los cursos'}\n`;
+            formattedReport += `Periodo: ${actionResult.reportData.period || 'Todo el periodo'}\n\n`;
+            formattedReport += 'Resumen de asistencia:\n';
+            formattedReport += `- Asistencia promedio: ${actionResult.reportData.averageAttendance || '0'}%\n`;
+            formattedReport += `- Total de clases: ${actionResult.reportData.totalClasses || '0'}\n`;
+          } else if (reportType === 'student_grades') {
+            formattedReport += 'Reporte de Calificaciones\n';
+            formattedReport += `Estudiante: ${actionResult.reportData.studentName || 'Todos los estudiantes'}\n`;
+            formattedReport += `Curso: ${actionResult.reportData.courseName || 'Todos los cursos'}\n\n`;
+            formattedReport += 'Resumen de calificaciones:\n';
+            formattedReport += `- Promedio general: ${actionResult.reportData.averageGrade || '0'}\n`;
+            formattedReport += `- Mejor calificación: ${actionResult.reportData.highestGrade || '0'}\n`;
+            formattedReport += `- Calificación más baja: ${actionResult.reportData.lowestGrade || '0'}\n`;
+          } else if (reportType === 'student_performance') {
+            formattedReport += 'Reporte de Rendimiento\n';
+            formattedReport += `Estudiante: ${actionResult.reportData.studentName || 'Todos los estudiantes'}\n`;
+            formattedReport += `Periodo: ${actionResult.reportData.period || 'Todo el periodo'}\n\n`;
+            formattedReport += 'Resumen de rendimiento:\n';
+            formattedReport += `- Promedio general: ${actionResult.reportData.averagePerformance || '0'}%\n`;
+            formattedReport += `- Asistencia: ${actionResult.reportData.attendanceRate || '0'}%\n`;
+            formattedReport += `- Tareas completadas: ${actionResult.reportData.completedAssignments || '0'}/${actionResult.reportData.totalAssignments || '0'}\n`;
+          } else {
+            formattedReport += 'Estadísticas Generales\n\n';
+            formattedReport += `- Total de estudiantes: ${actionResult.reportData.totalStudents || '0'}\n`;
+            formattedReport += `- Total de cursos: ${actionResult.reportData.totalCourses || '0'}\n`;
+            formattedReport += `- Promedio general: ${actionResult.reportData.overallAverage || '0'}\n`;
+          }
+          
+          contextData = formattedReport;
+        } else {
+          contextData = `Error al generar reporte: ${actionResult.message}`;
+        }
+        break;
+        
+      case 'general_query':
+        if (userRole === 'admin' && message.toLowerCase().includes('estudiante')) {
+          // Si es un administrador preguntando por un estudiante, intentamos extraer el ID o nombre
+          const studentIdentifier = extractStudentIdentifier(message);
+          if (studentIdentifier) {
+            const studentData = await getStudentData(studentIdentifier);
+            if (studentData) {
+              contextData = `Información del estudiante: ${JSON.stringify(studentData)}`;
+            }
+          }
+        }
+        break;
+    }
+    
+    // Construir el prompt para Ollama
+    const prompt = `
+    Eres un asistente educativo para la plataforma EduTrack360.
+    
+    ${contextData ? `Contexto adicional: ${contextData}` : ''}
+    
+    Pregunta del usuario (${userRole}): ${message}
+    
+    Responde de manera concisa y profesional, proporcionando información relevante para el contexto educativo.
+    
+    ${actionResult && actionResult.success ? 
+      `Incluye en tu respuesta que la acción solicitada se ha completado exitosamente: ${actionResult.message}` : 
+      actionResult ? `Incluye en tu respuesta que hubo un problema con la acción solicitada: ${actionResult.message}` : ''}
+    
+    Si el usuario está intentando crear un usuario o curso pero faltan datos, solicítalos de manera específica.
+    Si el usuario está intentando generar un reporte pero no especificó el tipo, pregúntale si desea un reporte de rendimiento de estudiantes, asistencia de curso o estadísticas generales.
+    `;
+    
+    // Obtener respuesta de Ollama pasando la intención, entidades y mensaje original
+    const response = await generateOllamaResponse(prompt, 'llama3', intent, entities, message);
+    
+    return {
+      success: true,
+      message: response,
+      actionResult
+    };
+  } catch (error) {
+    console.error('Error en el procesamiento del mensaje:', error);
+    return {
+      success: false,
+      message: 'Ocurrió un error al procesar tu mensaje. Por favor, inténtalo de nuevo más tarde.'
+    };
+  }
+};
+
+// Función auxiliar para extraer identificadores de estudiantes de un mensaje
+const extractStudentIdentifier = (message) => {
+  // Implementación básica - se podría mejorar con NLP
+  const idMatch = message.match(/id:?\s*([a-f0-9]{24})/i);
+  if (idMatch) return idMatch[1];
+  
+  // Aquí se podrían implementar más métodos de extracción
+  return null;
+};
+
+export default {
+  processChatMessage
+};

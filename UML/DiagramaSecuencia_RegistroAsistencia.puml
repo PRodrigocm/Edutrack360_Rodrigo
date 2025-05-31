@@ -1,0 +1,70 @@
+@startuml DiagramaSecuencia_RegistroAsistencia
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+skinparam maxmessagesize 100
+skinparam sequenceParticipant underline
+skinparam sequenceLifeLineBorderColor #A9D18E
+skinparam sequenceLifeLineBackgroundColor #E2F0D9
+skinparam sequenceGroupBackgroundColor #FCE4D6
+skinparam sequenceGroupBorderColor #F4B084
+
+title Diagrama de Secuencia - Registro de Asistencia
+
+actor "Profesor" as Teacher
+participant "Interfaz de\nAsistencia" as UI
+participant "Controlador de\nAsistencia" as Controller
+participant "Servicio de\nAsistencia" as Service
+participant "Base de Datos" as DB
+
+autonumber
+
+Teacher -> UI: Selecciona curso para\nregistrar asistencia
+activate UI
+
+UI -> Controller: obtenerEstudiantesDelCurso(cursoId)
+activate Controller
+
+Controller -> Service: getStudentsByCourse(cursoId)
+activate Service
+
+Service -> DB: Consulta estudiantes inscritos
+activate DB
+DB --> Service: Lista de estudiantes
+deactivate DB
+
+Service --> Controller: Lista de estudiantes
+deactivate Service
+
+Controller --> UI: Lista de estudiantes
+deactivate Controller
+
+UI --> Teacher: Muestra lista de estudiantes\npara registro de asistencia
+deactivate UI
+
+Teacher -> UI: Marca asistencia para\ncada estudiante
+activate UI
+
+Teacher -> UI: Confirma registro
+UI -> Controller: guardarRegistroAsistencia(datos)
+activate Controller
+
+Controller -> Service: saveAttendanceRecord(datos)
+activate Service
+
+Service -> Service: Validar datos
+
+Service -> DB: Guardar registro de asistencia
+activate DB
+DB --> Service: Confirmación de guardado
+deactivate DB
+
+Service --> Controller: Resultado de la operación
+deactivate Service
+
+Controller --> UI: Resultado de la operación
+deactivate Controller
+
+UI --> Teacher: Confirmación de registro\ncompletado
+deactivate UI
+
+@enduml

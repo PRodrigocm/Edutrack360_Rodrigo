@@ -1,0 +1,66 @@
+@startuml DiagramaSecuencia_GeneracionReporte
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+skinparam maxmessagesize 100
+skinparam sequenceParticipant underline
+skinparam sequenceLifeLineBorderColor #A9D18E
+skinparam sequenceLifeLineBackgroundColor #E2F0D9
+skinparam sequenceGroupBackgroundColor #FCE4D6
+skinparam sequenceGroupBorderColor #F4B084
+
+title Diagrama de Secuencia - Generación de Reportes a través del Chatbot
+
+actor "Usuario" as User
+participant "Chatbot\nInterfaz" as Chatbot
+participant "AI Service" as AIService
+participant "Report Service" as ReportService
+participant "Base de Datos" as DB
+participant "PDF Generator" as PDFGen
+
+autonumber
+
+User -> Chatbot: Solicita generar reporte\n("generar reporte")
+activate Chatbot
+
+Chatbot -> AIService: processChatMessage(mensaje)
+activate AIService
+
+AIService -> AIService: Detectar intención\n(generate_report)
+
+AIService -> ReportService: handleReportDownload(intent, entities)
+activate ReportService
+
+ReportService -> ReportService: Determinar tipo de reporte\n(completo, asistencia, etc.)
+
+ReportService -> DB: Consultar datos necesarios
+activate DB
+DB --> ReportService: Datos obtenidos (profesores, estudiantes, etc.)
+deactivate DB
+
+ReportService -> PDFGen: Generar PDF con los datos
+activate PDFGen
+PDFGen --> ReportService: PDF generado
+deactivate PDFGen
+
+ReportService -> ReportService: Guardar PDF en sistema de archivos
+ReportService --> AIService: URL de descarga del reporte
+deactivate ReportService
+
+AIService --> Chatbot: Respuesta con enlace de descarga
+deactivate AIService
+
+Chatbot --> User: Muestra mensaje con enlace\npara descargar el reporte
+deactivate Chatbot
+
+User -> Chatbot: Clic en enlace de descarga
+activate Chatbot
+
+Chatbot -> ReportService: Solicitud de descarga
+activate ReportService
+ReportService --> Chatbot: Archivo PDF
+deactivate ReportService
+
+Chatbot --> User: Descarga del reporte
+deactivate Chatbot
+
+@enduml

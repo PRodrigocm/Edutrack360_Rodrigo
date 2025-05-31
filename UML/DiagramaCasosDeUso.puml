@@ -1,0 +1,129 @@
+@startuml DiagramaCasosDeUso
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 20
+skinparam linetype ortho
+skinparam handwritten false
+
+!define ACTOR_COLOR #E2F0D9
+!define USECASE_COLOR #D9E2F3
+!define SYSTEM_COLOR #FCE4D6
+
+title Diagrama de Casos de Uso - EduTrack360
+
+' Actores
+actor "Administrador" as Admin #ACTOR_COLOR
+actor "Profesor" as Teacher #ACTOR_COLOR
+actor "Estudiante" as Student #ACTOR_COLOR
+
+' Sistema
+rectangle EduTrack360 #SYSTEM_COLOR {
+  ' Casos de uso generales
+  usecase "Iniciar sesión" as Login #USECASE_COLOR
+  usecase "Cerrar sesión" as Logout #USECASE_COLOR
+  usecase "Cambiar contraseña" as ChangePassword #USECASE_COLOR
+  usecase "Interactuar con chatbot" as ChatbotInteraction #USECASE_COLOR
+  
+  ' Casos de uso del administrador
+  package "Gestión de Usuarios" {
+    usecase "Crear usuario" as CreateUser #USECASE_COLOR
+    usecase "Editar usuario" as EditUser #USECASE_COLOR
+    usecase "Eliminar usuario" as DeleteUser #USECASE_COLOR
+    usecase "Asignar roles" as AssignRoles #USECASE_COLOR
+  }
+  
+  package "Gestión de Cursos" {
+    usecase "Crear curso" as CreateCourse #USECASE_COLOR
+    usecase "Editar curso" as EditCourse #USECASE_COLOR
+    usecase "Eliminar curso" as DeleteCourse #USECASE_COLOR
+    usecase "Asignar profesores a cursos" as AssignTeachers #USECASE_COLOR
+    usecase "Inscribir estudiantes en cursos" as EnrollStudents #USECASE_COLOR
+  }
+  
+  package "Gestión de Bloques" {
+    usecase "Crear bloque" as CreateBlock #USECASE_COLOR
+    usecase "Editar bloque" as EditBlock #USECASE_COLOR
+    usecase "Eliminar bloque" as DeleteBlock #USECASE_COLOR
+    usecase "Asignar estudiantes a bloques" as AssignStudentsToBlocks #USECASE_COLOR
+  }
+  
+  package "Reportes" {
+    usecase "Generar reportes" as GenerateReports #USECASE_COLOR
+    usecase "Descargar reportes" as DownloadReports #USECASE_COLOR
+    usecase "Solicitar reportes al chatbot" as RequestReportsChatbot #USECASE_COLOR
+  }
+  
+  ' Casos de uso del profesor
+  package "Gestión de Asistencias" {
+    usecase "Registrar asistencia" as RecordAttendance #USECASE_COLOR
+    usecase "Ver registro de asistencias" as ViewAttendance #USECASE_COLOR
+    usecase "Editar registro de asistencias" as EditAttendance #USECASE_COLOR
+  }
+  
+  package "Gestión de Asignaciones" {
+    usecase "Crear asignación" as CreateAssignment #USECASE_COLOR
+    usecase "Editar asignación" as EditAssignment #USECASE_COLOR
+    usecase "Eliminar asignación" as DeleteAssignment #USECASE_COLOR
+    usecase "Calificar asignación" as GradeAssignment #USECASE_COLOR
+  }
+  
+  ' Casos de uso del estudiante
+  package "Actividades del Estudiante" {
+    usecase "Ver cursos inscritos" as ViewEnrolledCourses #USECASE_COLOR
+    usecase "Ver asignaciones pendientes" as ViewPendingAssignments #USECASE_COLOR
+    usecase "Ver calificaciones" as ViewGrades #USECASE_COLOR
+    usecase "Ver registro de asistencia personal" as ViewPersonalAttendance #USECASE_COLOR
+  }
+}
+
+' Relaciones para Administrador
+Admin --> Login
+Admin --> Logout
+Admin --> ChangePassword
+Admin --> ChatbotInteraction
+Admin --> CreateUser
+Admin --> EditUser
+Admin --> DeleteUser
+Admin --> AssignRoles
+Admin --> CreateCourse
+Admin --> EditCourse
+Admin --> DeleteCourse
+Admin --> AssignTeachers
+Admin --> EnrollStudents
+Admin --> CreateBlock
+Admin --> EditBlock
+Admin --> DeleteBlock
+Admin --> AssignStudentsToBlocks
+Admin --> GenerateReports
+Admin --> DownloadReports
+Admin --> RequestReportsChatbot
+
+' Relaciones para Profesor
+Teacher --> Login
+Teacher --> Logout
+Teacher --> ChangePassword
+Teacher --> ChatbotInteraction
+Teacher --> RecordAttendance
+Teacher --> ViewAttendance
+Teacher --> EditAttendance
+Teacher --> CreateAssignment
+Teacher --> EditAssignment
+Teacher --> DeleteAssignment
+Teacher --> GradeAssignment
+Teacher --> ViewEnrolledCourses
+Teacher --> GenerateReports
+Teacher --> DownloadReports
+Teacher --> RequestReportsChatbot
+
+' Relaciones para Estudiante
+Student --> Login
+Student --> Logout
+Student --> ChangePassword
+Student --> ChatbotInteraction
+Student --> ViewEnrolledCourses
+Student --> ViewPendingAssignments
+Student --> ViewGrades
+Student --> ViewPersonalAttendance
+
+@enduml

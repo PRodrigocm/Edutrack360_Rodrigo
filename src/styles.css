@@ -1,0 +1,281 @@
+/* Estilos globales para mejorar la visibilidad y el contraste */
+
+/* Fondo de la página principal */
+body {
+  background-color: #f0f9ff;
+  color: #0f172a;
+}
+
+/* Mejoras de contraste para tarjetas */
+.bg-white {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bg-white:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Mejoras para texto */
+h1 {
+  color: #1e3a8a;
+  font-weight: 800;
+  font-size: 2.5rem !important;
+  line-height: 1.2 !important;
+  margin-bottom: 1rem !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+h2 {
+  color: #1e40af;
+  font-weight: 700;
+  font-size: 1.875rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+h3, h4, h5, h6 {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* Estilo para subtu00edtulos */
+.subtitle {
+  color: #475569;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+/* Mejoras para tablas */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+thead {
+  background-color: #f8fafc;
+}
+
+th {
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+
+tr:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* Mejoras para botones */
+button {
+  font-weight: 600;
+}
+
+/* Mejoras para badges */
+.rounded-full {
+  border: 1px solid transparent;
+}
+
+/* Mejoras para inputs */
+input, select {
+  border-color: #cbd5e1 !important;
+}
+
+input:focus, select:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Mejoras para iconos */
+svg {
+  stroke-width: 2px;
+}
+
+/* Iconos de caracteru00edsticas */
+.feature-icon {
+  background-color: #eff6ff;
+  color: #2563eb;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  display: inline-flex;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+/* Iconos de navegaciu00f3n */
+.nav-icon {
+  color: #93c5fd;
+  margin-right: 0.5rem;
+}
+
+/* Iconos de estado */
+.status-icon {
+  background-color: #f0f9ff;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: inline-flex;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Mejoras para gráficos */
+canvas {
+  border: 1px solid #e2e8f0;
+  background-color: white;
+  border-radius: 0.5rem;
+}
+
+/* Mejoras para sidebar y navegación */
+.sidebar {
+  background-color: #1e293b;
+  color: white;
+}
+
+.sidebar a {
+  color: #e2e8f0;
+}
+
+.sidebar a:hover {
+  background-color: #334155;
+}
+
+.sidebar a.active {
+  background-color: #0284c7;
+  color: white;
+}
+
+/* Mejoras para colores de estado */
+.text-green-500 {
+  color: #16a34a !important;
+}
+
+.text-red-500 {
+  color: #dc2626 !important;
+}
+
+.text-yellow-500 {
+  color: #ca8a04 !important;
+}
+
+.text-blue-500 {
+  color: #0284c7 !important;
+}
+
+.text-blue-600 {
+  color: #0369a1 !important;
+}
+
+.text-blue-700 {
+  color: #075985 !important;
+}
+
+.text-green-600 {
+  color: #15803d !important;
+}
+
+.text-green-700 {
+  color: #166534 !important;
+}
+
+.text-red-600 {
+  color: #b91c1c !important;
+}
+
+.text-red-700 {
+  color: #991b1b !important;
+}
+
+.text-yellow-600 {
+  color: #b45309 !important;
+}
+
+.text-yellow-700 {
+  color: #92400e !important;
+}
+
+/* Mejoras para fondos de color */
+.bg-blue-50 {
+  background-color: #eff6ff !important;
+  border: 1px solid #bfdbfe !important;
+}
+
+.bg-green-50 {
+  background-color: #f0fdf4 !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
+.bg-red-50 {
+  background-color: #fef2f2 !important;
+  border: 1px solid #fecaca !important;
+}
+
+.bg-yellow-50 {
+  background-color: #fffbeb !important;
+  border: 1px solid #fef3c7 !important;
+}
+
+.bg-purple-50 {
+  background-color: #faf5ff !important;
+  border: 1px solid #e9d5ff !important;
+}
+
+/* Mejoras para badges de estado */
+.bg-green-100 {
+  background-color: #dcfce7 !important;
+  color: #166534 !important;
+  border: 1px solid #86efac !important;
+}
+
+.bg-red-100 {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fca5a5 !important;
+}
+
+.bg-yellow-100 {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  border: 1px solid #fcd34d !important;
+}
+
+.bg-blue-100 {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+  border: 1px solid #93c5fd !important;
+}
+
+.bg-gray-100 {
+  background-color: #f3f4f6 !important;
+  color: #374151 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+/* Mejoras para botones */
+.bg-blue-600 {
+  background-color: #2563eb !important;
+  border: none !important;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3) !important;
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: #1d4ed8 !important;
+  box-shadow: 0 4px 6px rgba(29, 78, 216, 0.4) !important;
+}
+
+/* Estilo para el botu00f3n principal de inicio */
+.get-started-btn {
+  background-color: #2563eb !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 0.75rem 2rem !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3) !important;
+}
+
+.get-started-btn:hover {
+  background-color: #1d4ed8 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 8px rgba(29, 78, 216, 0.4) !important;
+}

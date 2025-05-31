@@ -1,0 +1,162 @@
+@startuml DiagramaClases
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam monochrome false
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam classBackgroundColor #D9E2F3
+skinparam packageBackgroundColor #FCE4D6
+skinparam arrowColor #000000
+skinparam stereotypeCBackgroundColor #E2F0D9
+
+title Diagrama de Clases - EduTrack360
+
+package "Modelos" {
+  class Usuario {
+    -id: ObjectId
+    -nombre: String
+    -email: String
+    -contraseña: String
+    -rol: String
+    -fechaCreación: Date
+    +validarContraseña(contraseña: String): Boolean
+    +cambiarContraseña(nuevaContraseña: String): void
+  }
+  
+  class Profesor {
+    -id: ObjectId
+    -usuario: Usuario
+    -idProfesor: String
+    -calificación: String
+    -especialización: String
+    -teléfono: String
+    -dirección: String
+    -cursos: List<Curso>
+    -fechaIngreso: Date
+    +asignarCurso(curso: Curso): void
+    +removerCurso(curso: Curso): void
+  }
+  
+  class Estudiante {
+    -id: ObjectId
+    -usuario: Usuario
+    -idEstudiante: String
+    -fechaNacimiento: Date
+    -dirección: String
+    -teléfono: String
+    -nombrePadre: String
+    -contactoPadre: String
+    -cursos: List<Curso>
+    -grado: String
+    -departamento: String
+    -bloque: Bloque
+    +inscribirEnCurso(curso: Curso): void
+    +darDeBajaEnCurso(curso: Curso): void
+    +asignarBloque(bloque: Bloque): void
+  }
+  
+  class Curso {
+    -id: ObjectId
+    -nombre: String
+    -código: String
+    -descripción: String
+    -profesor: Profesor
+    -estudiantes: List<Estudiante>
+    -bloques: List<Bloque>
+    -fechaInicio: Date
+    -fechaFin: Date
+    -horario: String
+    -aula: String
+    -capacidadMáxima: Number
+    +agregarEstudiante(estudiante: Estudiante): void
+    +removerEstudiante(estudiante: Estudiante): void
+    +agregarBloque(bloque: Bloque): void
+    +removerBloque(bloque: Bloque): void
+  }
+  
+  class Bloque {
+    -id: ObjectId
+    -nombre: String
+    -descripción: String
+    -cursos: List<Curso>
+    -estudiantes: List<Estudiante>
+    -fechaInicio: Date
+    -fechaFin: Date
+    +agregarEstudiante(estudiante: Estudiante): void
+    +removerEstudiante(estudiante: Estudiante): void
+    +agregarCurso(curso: Curso): void
+    +removerCurso(curso: Curso): void
+  }
+  
+  class Asistencia {
+    -id: ObjectId
+    -curso: Curso
+    -fecha: Date
+    -registros: List<RegistroAsistencia>
+    -tomadaPor: Profesor
+    -fechaCreación: Date
+    +agregarRegistro(registro: RegistroAsistencia): void
+    +modificarRegistro(estudiante: Estudiante, estado: String): void
+    +obtenerPorcentajeAsistencia(): Number
+  }
+  
+  class RegistroAsistencia {
+    -estudiante: Estudiante
+    -estado: String
+    -observación: String
+  }
+  
+  class Asignación {
+    -id: ObjectId
+    -título: String
+    -descripción: String
+    -curso: Curso
+    -fechaAsignación: Date
+    -fechaEntrega: Date
+    -puntajeTotal: Number
+    -archivosAdjuntos: List<String>
+    -entregas: List<EntregaAsignación>
+    +agregarEntrega(entrega: EntregaAsignación): void
+    +calificarEntrega(estudiante: Estudiante, puntaje: Number): void
+    +obtenerPromedioCalificaciones(): Number
+  }
+  
+  class EntregaAsignación {
+    -estudiante: Estudiante
+    -fechaEntrega: Date
+    -archivosEntregados: List<String>
+    -puntajeObtenido: Number
+    -comentarios: String
+    -estado: String
+  }
+  
+  class Reporte {
+    -id: ObjectId
+    -tipo: String
+    -fechaGeneración: Date
+    -generadoPor: Usuario
+    -contenido: String
+    -filtros: Map<String, Object>
+    -rutaArchivo: String
+    +descargar(): File
+    +enviarPorEmail(email: String): void
+  }
+}
+
+' Relaciones
+Usuario "1" <-- "1" Profesor : tiene
+Usuario "1" <-- "1" Estudiante : tiene
+Profesor "1" <-- "*" Curso : es impartido por
+Curso "*" <--> "*" Estudiante : está inscrito en
+Curso "*" <--> "*" Bloque : está asignado a
+Estudiante "*" <--> "*" Bloque : pertenece a
+Curso "1" <-- "*" Asistencia : pertenece a
+Profesor "1" <-- "*" Asistencia : es registrada por
+Asistencia "1" *--> "*" RegistroAsistencia : contiene
+RegistroAsistencia "*" --> "1" Estudiante : se refiere a
+Curso "1" <-- "*" Asignación : pertenece a
+Asignación "1" *--> "*" EntregaAsignación : tiene
+EntregaAsignación "*" --> "1" Estudiante : es entregada por
+Usuario "1" <-- "*" Reporte : es generado por
+
+@enduml
